@@ -9,9 +9,9 @@ Unspervised creation of sentence representations using BERT's MLM head
 
 [for GPU machines](https://github.com/ajitrajasekharan/multi_gpu_test)
 
-For CPU machines
 
-[Follow instruction to install transformers](https://github.com/huggingface/transformers)
+
+[For CPU machines follow instruction to install transformers](https://github.com/huggingface/transformers)
 
 Clone this repository
 

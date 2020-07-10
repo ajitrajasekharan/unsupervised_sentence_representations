@@ -53,7 +53,7 @@ Shown below are heatmaps for short and long sentence text.
 ![Long sentences](heatmaps/big.png)
 
 
-# Comparison with USE, Sentence transformer and SBER=WK
+# Comparison with USE, Sentence transformer and SBER-WK
 Please refer to the links for the installation of these models. The test scripts to generate heatmaps for these models is present in the *compare* directory
 
 

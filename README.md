@@ -25,6 +25,21 @@ The python utility above will extract bert word vectors from the downloaded BERT
 
 # Example sentence representations
 
+#Start server
+
+(cd server;run_server.sh)
+
+Confirm server works by 
+
+wget -O test http://127.0.0.1:8900/dummy/"This is to test BERT MLM head server"
+
+The test file should contain
+
+{"tokenized": ["This", "is", "to", "test", "B", "##ER", "##T", "M", "##LM", "head", "server"], "semantic": ["This", "this", "These", "is", "was", "has", "to", "for", "the", "test", "Test", "testing", "BC", "AB", "BR", "ER", "block", "Block", "the", "and", "of", "MA", "ME", "MS", "modular", "stack", "module", "head", "driver", "the", "server", "system", "processor"]}
+
+
+Then run client test
+
 ./run.sh 
 
 The above script has example calls to generate sentence signatures, interactive and batch mode perform sentence similarity.

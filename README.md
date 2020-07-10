@@ -7,11 +7,11 @@ Unspervised creation of sentence representations using BERT's MLM head
 
 # Installation
 
-[ for GPU machines ] (https://github.com/ajitrajasekharan/multi_gpu_test)
+[for GPU machines](https://github.com/ajitrajasekharan/multi_gpu_test)
 
 For CPU machines
 
-[ Follow instruction to install transfomers ] (https://github.com/huggingface/transformers)
+[Follow instruction to install transformers](https://github.com/huggingface/transformers)
 
 Clone this repository
 

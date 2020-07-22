@@ -1,5 +1,6 @@
 import pdb
 import sys
+import os
 import operator
 from collections import OrderedDict
 import subprocess
@@ -16,6 +17,9 @@ import requests
 COMP_REF = "ref"
 COMP_MIN = "min"
 COMP_COS = "cos"
+
+
+INNER_PRODUCT_FILE = "inner_prod_cache.json"
 
 
 try:
@@ -55,8 +59,12 @@ def read_term_freqs(terms_file):
     print("count of term frequency terms:", len(terms_dict))
     return terms_dict
 
+
+
+	
+
 class UnsupSE:
-    def __init__(self, model_path,do_lower, terms_file,embeds_file,term_freqs_file,cache_embeds,normalize):
+    def __init__(self, model_path,do_lower, terms_file,embeds_file,term_freqs_file,cache_dir,cache_embeds,normalize):
         do_lower = True if do_lower == 1 else False
         self.tokenizer = BertTokenizer.from_pretrained(model_path,do_lower_case=do_lower)
         self.terms_dict = read_terms(terms_file)
@@ -64,9 +72,45 @@ class UnsupSE:
         self.term_freqs = read_term_freqs(term_freqs_file)
         self.cache = cache_embeds
         self.embeds_cache = {}
-        self.cosine_cache = {}
         self.dist_threshold_cache = {}
         self.normalize = normalize
+        self.cache_dir = cache_dir
+        self.read_or_gen_inner_products(cache_dir,self.terms_dict,model_path)
+
+
+    def read_or_gen_inner_products(self,cache_dir,vocab_dict,model_path):
+        file_name = cache_dir + "/" + INNER_PRODUCT_FILE
+        try:
+            with open(file_name) as fp:
+                self.inner_product_cache =  json.load(fp)
+        except:
+            print("Inner product Cache empty. Creating it for model: " + model_path + " in directory: " + cache_dir + ". This is a one time process for each model.")
+            try:
+                os.mkdir(cache_dir)
+            except:
+                pass
+            tokenize = False
+            self.inner_product_cache = {}
+            count = 0
+            total = len(vocab_dict)*len(vocab_dict)/2
+            for l_term in vocab_dict:
+                for r_term in vocab_dict:
+                    key1 = l_term + '_' + r_term
+                    key2 = r_term + '_' + l_term
+                    if (key1 not in self.inner_product_cache and key2 not in self.inner_product_cache):
+                        val = self.calc_inner_prod(l_term,r_term,tokenize)
+                        self.inner_product_cache[key1] = val
+                        self.inner_product_cache[key2] = val
+                        count += 1
+                        print(str(round((float(count)/total)*100,6)) + "%",end="\r")
+            print("\nSaving inner products to cache")
+            with open(file_name,"w") as fp:
+                json.dump(self.inner_product_cache,fp)
+            with open(file_name) as fp:
+                test_dict =  json.load(fp)
+            assert(len(test_dict) == len(self.inner_product_cache))
+
+
 
 
 
@@ -107,8 +151,10 @@ class UnsupSE:
         return vec
 
     def calc_inner_prod(self,text1,text2,tokenize):
-        if (self.cache and text1 in self.cosine_cache and text2 in self.cosine_cache[text1]):
-            return self.cosine_cache[text1][text2]
+        full_term = text1 + '_' + text2
+        full_term2 = text2 + '_' + text1
+        if (self.cache and full_term in self.inner_product_cache):
+            return self.inner_product_cache[full_term]
         vec1 = self.get_embedding(text1,tokenize)
         vec2 = self.get_embedding(text2,tokenize)
         if (vec1 is None or vec2 is None):
@@ -116,9 +162,9 @@ class UnsupSE:
             return 0
         val = np.inner(vec1,vec2)
         if (self.cache):
-            if (text1 not in self.cosine_cache):
-                self.cosine_cache[text1] = {}
-            self.cosine_cache[text1][text2] = val
+            if (full_term not in self.inner_product_cache):
+                self.inner_product_cache[full_term] = val
+                self.inner_product_cache[full_term2] = val
         return val
 
 
@@ -416,11 +462,12 @@ def main():
     parser.add_argument('-server_url', action="store", dest="server_url", default=DEFAULT_SERVER_URL,help='URL of mask server to connect to')
     parser.add_argument('-term_freqs', action="store", dest="term_freqs", default=DEFAULT_TERM_FREQS,help='token frequencies in a corpus')
     parser.add_argument('-weight_comp', action="store", dest="weight_comp", default=DEFAULT_WEIGHT_COMP, help='Type of weighting of cosine values of word pairs. min,ref,cos.  min -  Use the min of both words. ref- use the frequency count of input sentence word only.  cos - just use cosine weights alone')
+    parser.add_argument('-cache', action="store", dest="cache", default="",help='Cache directory location to store dot products of berts vectors')
 
     results = parser.parse_args()
     server_url = results.server_url
     limit = results.limit
-    b_embeds = UnsupSE(results.model,results.tolower,results.vocab,results.vectors,results.term_freqs,True,True) #True - for cache embeds; normalize - True
+    b_embeds = UnsupSE(results.model,results.tolower,results.vocab,results.vectors,results.term_freqs,results.cache,True,True) #True - for cache embeds; normalize - True
     if (results.mode == "gen"):
         if (len(results.ref_text) == 0 or len(results.output) == 0):
             print("Reference text file needs to be specified")

@@ -75,7 +75,9 @@ class UnsupSE:
         self.dist_threshold_cache = {}
         self.normalize = normalize
         self.cache_dir = cache_dir
-        self.read_or_gen_inner_products(cache_dir,self.terms_dict,model_path)
+        if (len(cache_dir) > 0):
+          self.read_or_gen_inner_products(cache_dir,self.terms_dict,model_path)
+        self.inner_product_cache = {}
 
 
     def read_or_gen_inner_products(self,cache_dir,vocab_dict,model_path):
@@ -463,7 +465,7 @@ def main():
     parser.add_argument('-server_url', action="store", dest="server_url", default=DEFAULT_SERVER_URL,help='URL of mask server to connect to')
     parser.add_argument('-term_freqs', action="store", dest="term_freqs", default=DEFAULT_TERM_FREQS,help='token frequencies in a corpus')
     parser.add_argument('-weight_comp', action="store", dest="weight_comp", default=DEFAULT_WEIGHT_COMP, help='Type of weighting of cosine values of word pairs. min,ref,cos.  min -  Use the min of both words. ref- use the frequency count of input sentence word only.  cos - just use cosine weights alone')
-    parser.add_argument('-cache', action="store", dest="cache", default="",help='Cache directory location to store dot products of berts vectors')
+    parser.add_argument('-cache', action="store", dest="cache", default="",help='Cache directory location to store dot products of berts vectors. If this is not set, then the model will not read from a persistent cache. Nor will it precompute inner product')
 
     results = parser.parse_args()
     server_url = results.server_url

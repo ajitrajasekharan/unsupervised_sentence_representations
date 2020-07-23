@@ -82,6 +82,7 @@ class UnsupSE:
         file_name = cache_dir + "/" + INNER_PRODUCT_FILE
         try:
             with open(file_name) as fp:
+                print("Reading inner product cache. This will take 30-60 minutes")
                 self.inner_product_cache =  json.load(fp)
         except:
             print("Inner product Cache empty. Creating it for model: " + model_path + " in directory: " + cache_dir + ". This is a one time process for each model.")

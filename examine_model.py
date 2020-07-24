@@ -13,7 +13,8 @@ def examine(command,model_name,key_name):
 	md = torch.load(model_name,map_location='cpu')
 	if (command == 1):
 		for k in md:
-		    print(k)
+		    embeds = md[k] 
+		    print(k,":",len(embeds.tolist()))
 	elif (command == 2):
 		for k in md:
 			if (k == key_name):

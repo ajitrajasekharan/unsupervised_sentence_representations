@@ -77,7 +77,8 @@ class UnsupSE:
         self.cache_dir = cache_dir
         if (len(cache_dir) > 0):
           self.read_or_gen_inner_products(cache_dir,self.terms_dict,model_path)
-        self.inner_product_cache = {}
+        else:
+          self.inner_product_cache = {}
 
 
     def read_or_gen_inner_products(self,cache_dir,vocab_dict,model_path):

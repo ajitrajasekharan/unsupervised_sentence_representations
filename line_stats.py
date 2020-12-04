@@ -46,7 +46,6 @@ def gen_line_stats(model_path,do_lower,ref_text,output):
             total_len += line_len
             if (tokenized_len > max_t_len):
                 print(line_len,tokenized_len)
-                pdb.set_trace()
                 max_t_len = tokenized_len
                 max_l_len = line_len
             if (line_len not in line_stats):
